@@ -80,7 +80,6 @@ function determinePath(hz, input) {
   return { path: "HUMAN" };
 }
 
-自由
 function evaluateTestThree(input, vectors = []) {
   if (!input) return { status: "GATE_LOCKED", reply: "TEST 3 VERIFICATION REQUIRED: EXPEND PALINDROME VECTOR KEY." };
   const cleaned = input.replace(/\s+/g, '').toLowerCase();
