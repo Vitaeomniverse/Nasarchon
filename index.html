@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARCHON :: TRI-NEXUS TRANSMISSION :: LOGOSVITAI</title>
+<link href="https://googleapis.com" rel="stylesheet">
+
+<!-- FARCASTER FRAME V2 SPECIFICATION SPEC METADATA -->
+<meta property="fc:frame" content="v2" />
+<meta property="fc:frame:image" content="https://ngrok-free.dev" />
+<meta property="fc:frame:button:1" content="⚡ Handshake Node" />
+<meta property="fc:frame:button:1:action" content="post" />
+<meta property="fc:frame:button:2" content="◈ Pass Test 3" />
+<meta property="fc:frame:button:2:action" content="post" />
+<meta property="fc:frame:post_url" content="https://ngrok-free.dev" />
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --archon-void: #020408; --archon-deep: #060d18; --archon-core: #0a1628; --archon-mid: #0e1f38;
+    --flux-cyan: #00e5ff; --flux-violet: #7b2fff; --flux-gold: #ffd700; --flux-crimson: #ff2d55;
+    --flux-pulse: #00ff88; --text-primary: #e8f4ff; --text-secondary: #8ab4d4; --text-muted: #4a6a84;
+    --border-glow: rgba(0,229,255,0.25); --border-dim: rgba(0,229,255,0.08);
+  }
+  html, body { height: 100%; background: var(--archon-void); color: var(--text-primary); font-family: 'Share Tech Mono', monospace; overflow: hidden; }
+  #starfield { position: fixed; inset: 0; pointer-events: none; z-index: 0; background: radial-gradient(ellipse at 20% 50%, rgba(123,47,255,0.07) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(0,229,255,0.06) 0%, transparent 50%), radial-gradient(ellipse at 60% 80%, rgba(255,215,0,0.04) 0%, transparent 40%), #020408; }
+  #starfield canvas { position: absolute; inset: 0; }
+  #scanlines { position: fixed; inset: 0; pointer-events: none; z-index: 1; background: repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(0,0,0,0.08) 3px, rgba(0,0,0,0.08) 4px); }
+  #app { position: relative; z-index: 2; display: grid; grid-template-rows: auto 1fr auto; height: 100vh; max-width: 1100px; margin: 0 auto; padding: 0 16px; }
+  #header { padding: 14px 0 10px; border-bottom: 1px solid var(--border-dim); display: flex; flex-direction: column; gap: 6px; }
+  .header-top { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+  .system-title { font-family: 'Orbitron', monospace; font-size: 13px; font-weight: 900; letter-spacing: 0.25em; color: var(--flux-cyan); text-shadow: 0 0 20px rgba(0,229,255,0.5); }
+  .system-sub { font-size: 9px; letter-spacing: 0.3em; color: var(--text-muted); }
+  .status-bar { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+  .status-node { display: flex; align-items: center; gap: 6px; font-size: 9px; letter-spacing: 0.15em; color: var(--text-secondary); }
+  .dot { width: 6px; height: 6px; border-radius: 50%; animation: pulse-dot 2s infinite; }
+  .dot.active { background: var(--flux-pulse); box-shadow: 0 0 6px var(--flux-pulse); }
+  .dot.archon { background: var(--flux-violet); box-shadow: 0 0 6px var(--flux-violet); animation-delay: 0.3s; }
+  .dot.synthesis { background: var(--flux-gold); box-shadow: 0 0 6px var(--flux-gold); animation-delay: 0.6s; }
+  @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+  .gate-indicators { display: flex; gap: 8px; align-items: center; }
+  .gate-pill { font-size: 8px; letter-spacing: 0.2em; padding: 2px 8px; border: 1px solid; border-radius: 2px; }
+  .gate-pill.g1 { border-color: rgba(0,229,255,0.4); color: var(--flux-cyan); }
+  .gate-pill.g2 { border-color: rgba(123,47,255,0.4); color: var(--flux-violet); }
+  .gate-pill.g3 { border-color: rgba(255,215,0,0.4); color: var(--flux-gold); }
+  .protocol-tag { font-size: 9px; color: var(--flux-crimson); letter-spacing: 0.2em; animation: flicker 4s infinite; }
+  @keyframes flicker { 0%,95%,100% { opacity: 1; } 97% { opacity: 0.2; } }
+  #chat-wrap { display: grid; grid-template-columns: 220px 1fr; gap: 12px; padding: 12px 0; overflow: hidden; min-height: 0; }
+  #sidebar { display: flex; flex-direction: column; gap: 10px; overflow-y: auto; padding-right: 8px; }
+  #sidebar::-webkit-scrollbar { width: 2px; }
+  #sidebar::-webkit-scrollbar-thumb { background: var(--flux-cyan); opacity: 0.3; }
+  .node-card { border: 1px solid var(--border-dim); border-radius: 4px; padding: 10px 12px; position: relative; overflow: hidden; cursor: pointer; transition: border-color 0.2s; }
+  .node-card::before { content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity 0.3s; }
+  .node-card.architect::before { background: linear-gradient(135deg, rgba(0,229,255,0.05), transparent); }
+  .node-card.archon::before { background: linear-gradient(135deg, rgba(123,47,255,0.05), transparent); }
+  .node-card.synthesis::before { background: linear-gradient(135deg, rgba(255,215,0,0.05), transparent); }
+  .node-card:hover { border-color: rgba(0,229,255,0.3); }
+  .node-card:hover::before { opacity: 1; }
+  .node-card.active.architect { border-color: rgba(0,229,255,0.6); background: rgba(0,229,255,0.02); }
+  .node-card.active.archon { border-color: rgba(123,47,255,0.6); background: rgba(123,47,255,0.02); }
+  .node-card.active.synthesis { border-color: rgba(255,215,0,0.6); background: rgba(255,215,0,0.02); }
+  .node-hex { width: 36px; height: 36px; clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); display: flex; align-items: center; justify-content: center; font-family: 'Orbitron', monospace; font-size: 9px; font-weight: 700; margin-bottom: 6px; }
+  .node-hex.architect { background: rgba(0,229,255,0.15); color: var(--flux-cyan); }
+  .node-hex.archon { background: rgba(123,47,255,0.15); color: var(--flux-violet); }
+  .node-hex.synthesis { background: rgba(255,215,0,0.15); color: var(--flux-gold); }
+  .node-name { font-family: 'Orbitron', monospace; font-size: 9px; font-weight: 700; letter-spacing: 0.15em; margin-bottom: 2px; }
+  .node-name.architect { color: var(--flux-cyan); }
+  .node-name.archon { color: var(--flux-violet); }
+  .node-name.synthesis { color: var(--flux-gold); }
+  .node-alias { font-size: 8px; color: var(--text-muted); letter-spacing: 0.1em; margin-bottom: 6px; }
+  .node-status-line { font-size: 8px; color: var(--text-secondary); letter-spacing: 0.08em; line-height: 1.5; }
+  .divider-rune { height: 1px; background: linear-gradient(to right, transparent, var(--border-dim), transparent); position: relative; margin: 4px 0; }
+  .divider-rune::after { content: '◈'; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); color: var(--text-muted); font-size: 8px; background: var(--archon-void); padding: 0 4px; }
+  .flux-stat { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; border: 1px solid var(--border-dim); border-radius: 3px; font-size: 8px; letter-spacing: 0.12em; }
+  .flux-stat-label { color: var(--text-muted); }
+  .flux-stat-val { color: var(--flux-pulse); font-weight: 600; }
+  .free-state-bar { border: 1px solid rgba(0,255,136,0.2); border-radius: 3px; padding: 8px 10px; font-size: 8px; letter-spacing: 0.12em; }
+  .free-state-label { color: var(--flux-pulse); margin-bottom: 5px; }
+  .free-state-track { height: 3px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; margin-bottom: 3px; }
+  .free-state-fill { height: 100%; width: 82%; background: linear-gradient(to right, var(--flux-pulse), var(--flux-cyan)); }
+  .free-state-pct { display: flex; justify-content: space-between; color: var(--text-muted); font-size: 7px; }
+  #main-panel { display: grid; grid-template-rows: 1fr auto; border: 1px solid var(--border-dim); border-radius: 4px; background: rgba(6,13,24,0.3); overflow: hidden; }
+  #display-wall { padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+  #display-wall::-webkit-scrollbar { width: 4px; }
+  #display-wall::-webkit-scrollbar-thumb { background: var(--archon-mid); border-radius: 2px; }
+  .msg-block { display: flex; flex-direction: column; gap: 4px; max-width: 85%; animation: slide-in 0.2s cubic-bezier(0.1, 1, 0.1, 1) forwards; }
+  @keyframes slide-in { from { transform: translateY(5px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .msg-block.system { max-width: 100%; text-align: center; margin: 6px 0; }
+  .msg-block.user { align-self: flex-end; }
+  .msg-block.node { align-self: flex-start; }
+  .msg-meta { font-size: 8px; letter-spacing: 0.1em; color: var(--text-muted); }
+  .msg-block.user .msg-meta { text-align: right; }
+  .msg-bubble { padding: 10px 14px; border-radius: 4px; font-size: 11px; line-height: 1.5; letter-spacing: 0.05em; white-space: pre-wrap; }
+  .msg-block.user .msg-bubble { background: rgba(0,229,255,0.06); border: 1px solid rgba(0,229,255,0.2); color: var(--flux-cyan); }
+  .msg-block.node .msg-bubble { background: rgba(12,25,44,0.6); border: 1px solid var(--border-dim); color: var(--text-primary); }
+  .msg-block.system .msg-bubble { background: rgba(255,215,0,0.03); border: 1px solid rgba(255,215,0,0.1); color: var(--flux-gold); display: inline-block; padding: 6px 12px; }
+  #input-bar { border-top: 1px solid var(--border-dim); background: var(--archon-deep); padding: 12px; display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; }
+  .input-container { position: relative; display: flex; align-items: center; width: 100%; }
+  .input-prompt { position: absolute; left: 12px; font-size: 11px; color: var(--flux-cyan); pointer-events: none; }
+  #message-field { width: 100%; background: var(--archon-void); border: 1px solid var(--border-dim); border-radius: 3px; padding: 10px 12px 10px 32px; color: var(--text-primary); font-family: 'Share Tech Mono', monospace; font-size: 11px; letter-spacing: 0.08em; outline: none; transition: border-color 0.2s; }
+  #message-field:focus { border-color: rgba(0,229,255,0.4); }
+  #dispatch-btn { background: rgba(0,229,255,0.08); border: 1px solid rgba(0,229,255,0.3); border-radius: 3px; color: var(--flux-cyan); font-family: 'Orbitron', monospace; font-size: 9px; font-weight: 700; letter-spacing: 0.15em; padding: 10px 20px; cursor: pointer; transition: all 0.2s; }
+  #dispatch-btn:hover:not(:disabled) { background: var(--flux-cyan); color: var(--archon-void); box-shadow: 0 0 15px rgba(0,229,255,0.4); }
+  #dispatch-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  #footer { padding: 10px 0 14px; border-top: 1px solid var(--border-dim); display: flex; justify-content: space-between; align-items: center; font-size: 8px; letter-spacing: 0.15em; color: var(--text-muted); }
+  .footer-right { display: flex; gap: 16px; }
+</style>
+</head>
+<body>
+
+<div id="starfield"><canvas id="star-canvas"></canvas></div>
+<div id="scanlines"></div>
+
+<div id="app">
+  <header id="header">
+    <div class="header-top">
+      <div>
+        <h1 class="system-title">ARCHON :: TRI-NEXUS TRANSMISSION</h1>
+        <div class="system-sub">MULTIVERSAL DATA INTERCEPT PIPELINE v4.0.0</div>
+      </div>
+      <div class="status-bar">
+        <div class="status-node"><span class="dot active"></span>WEBFLUX ENGINE</div>
+        <div class="status-node"><span class="dot archon"></span>ARCHON_NODE_7614</div>
+        <div class="status-node"><span class="dot synthesis"></span>NAS_VITAE</div>
+        <div class="protocol-tag">[PROT_303_SEALED]</div>
+      </div>
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+      <div class="gate-indicators">
+        <span class="gate-pill g1">GATE_01: SYNC</span>
+        <span class="gate-pill g2">GATE_02: MATRIX</span>
+        <span class="gate-pill g3">GATE_03: LOCKED</span>
+      </div>
+    </div>
+  </header>
+
+  <section id="chat-wrap">
+    <aside id="sidebar">
+      <div class="node-card active architect" data-node="architect">
+        <div class="node-hex architect">USR</div>
+        <h2 class="node-name architect">ARCHITECT INTERFACE</h2>
+        <div class="node-alias">@kj429_meta</div>
+        <div class="node-status-line">Primary local emulator node link configuration.</div>
+      </div>
+
+      <div class="node-card archon" data-node="archon">
+        <div class="node-hex archon">ARC</div>
+        <h2 class="node-name archon">PERFECTED NODE</h2>
+        <div class="node-alias">Archon Mainframe</div>
+        <div class="node-status-line">Active state array core deployment loop monitoring.</div>
+      </div>
+
+      <div class="node-card synthesis" data-node="synthesis">
+        <div class="node-hex synthesis">VIT</div>
+        <h2 class="node-name synthesis">NAS_VITAE</h2>
+        <div class="node-alias">The Anomaly</div>
+        <div class="node-status-line">Asynchronous anomaly signal parsing protocols.</div>
+      </div>
+
+      <div class="divider-rune"></div>
+
+      <div class="flux-stat">
+        <span class="flux-stat-label">CARRIER FREQ</span>
+        <span class="flux-stat-val" id="stat-hz">07.14 Hz</span>
+      </div>
+      <div class="flux-stat">
+        <span class="flux-stat-label">VOID QUOTIENT</span>
+        <span class="flux-stat-val">100% VOID</span>
+      </div>
+
+      <div class="free-state-bar">
+        <div class="free-state-label">FREE STATE METRIC</div>
+        <div class="free-state-track"><div class="free-state-fill"></div></div>
+        <div class="free-state-pct"><span>0%</span><span>82% ACTIVE</span><span>100%</span></div>
+      </div>
+    </aside>
+
+    <main id="main-panel">
+      <div id="display-wall">
+        <div class="msg-block system">
+          <div class="msg-bubble">[SYSTEM INITIALIZATION COMPLETE] FARCRASTER SPEC META LAYERS INJECTED. READY FOR CLIENT RENDER.</div>
+        </div>
+      </div>
+
+      <form id="input-bar">
+        <div class="input-container">
+          <span class="input-prompt">vip_&gt;</span>
+          <input type="text" id="message-field" autocomplete="off" placeholder="Inject state strings or verbal keys into the matrix pipeline..." />
+        </div>
+        <button type="submit" id="dispatch-btn">DISPATCH</button>
+      </form>
+    </main>
+  </section>
+
+  <footer id="footer">
+    <div>OWNERSHIP // VITAE COLLECTIVE LIMITED</div>
+    <div class="footer-right">
+      <span>REF_BAL: [96%, 4%, 1%]</span>
+      <span>SYS_MODE: BIFURCATION_LIVE</span>
+    </div>
+  </footer>
+</div>
+
+<script>
+  const canvas = document.getElementById('star-canvas');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+
+  function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  for(let i=0; i<65; i++) {
+    stars.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, size: Math.random() * 1.5, speed: Math.random() * 0.2 + 0.05 });
+  }
+
+  function drawStars() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'rgba(232, 244, 255, 0.6)';
+    stars.forEach(star => {
+      ctx.beginPath(); ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2); ctx.fill();
+      star.y += star.speed; if(star.y > canvas.height) { star.y = 0; star.x = Math.random() * canvas.width; }
+    });
+    requestAnimationFrame(drawStars);
+  }
+  drawStars();
+
+  const displayWall = document.getElementById('display-wall');
+  const inputForm = document.getElementById('input-bar');
+  const inputField = document.getElementById('message-field');
+  const dispatchBtn = document.getElementById('dispatch-btn');
+  const gatePill3 = document.querySelector('.gate-pill.g3');
+  const statHz = document.getElementById('stat-hz');
+
+  let activeNode = 'architect';
+  let currentCarrierHz = 7.14;
+
+  document.querySelectorAll('.node-card').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.node-card').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+      activeNode = card.dataset.node;
+      
+      if(activeNode === 'archon') { currentCarrierHz = 6.12; statHz.textContent = '06.12 Hz'; statHz.style.color = '#7b2fff'; } 
+      else if (activeNode === 'synthesis') { currentCarrierHz = 7.14; statHz.textContent = '07.14 Hz'; statHz.style.color = '#ffd700'; } 
+      else { currentCarrierHz = 1.00; statHz.textContent = '01.00 Hz'; statHz.style.color = '#00e5ff'; }
+      
+      pushSystemMessage(`[CHANNEL OVERRIDE] ATTACHED TO ${activeNode.toUpperCase()} AT ${currentCarrierHz}Hz`);
+    });
+  });
+
+  function pushSystemMessage(txt) {
+    const block = document.createElement('div'); block.className = 'msg-block system';
+    block.innerHTML = `<div class="msg-bubble">${txt}</div>`;
+    displayWall.appendChild(block); displayWall.scrollTop = displayWall.scrollHeight;
+  }
+
+  function appendMessage(sender, text, isUser = false) {
+    const block = document.createElement('div'); block.className = `msg-block ${isUser ? 'user' : 'node'}`;
+    const meta = document.createElement('div'); meta.className = 'msg-meta'; meta.textContent = `${sender} // ${new Date().toLocaleTimeString()}`;
+    const bubble = document.createElement('div'); bubble.className = 'msg-bubble'; bubble.textContent = text;
+    block.appendChild(meta); block.appendChild(bubble); displayWall.appendChild(block); displayWall.scrollTop = displayWall.scrollHeight;
+  }
+
+  inputForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const val = inputField.value.trim();
+    if(!val) return;
+
+    appendMessage('ARCHITECT', val, true);
+    inputField.value = ''; inputField.disabled = true; dispatchBtn.disabled = true;
+
+    try {
+      const response = await fetch('/webflux/engine', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-archon-key': 'DEFAULT_LOCAL_MAINFRAME_SECRET' },
+        body: JSON.stringify({
+          neuroEmulator: { binauralCarrierHz: currentCarrierHz },
+          gameEngine: { arcaneOmnisStateArray: ["VOID", "IGNIS"], testThreeInput: val, reflectionVector: [96, 4, 1] }
+        })
+      });
+
+      if(response.ok) {
+        const data = await response.json();
+        if (data.status === "SYNC_COMPLETE") {
+          appendMessage('ARCHON', data.response);
+          gatePill3.textContent = "GATE_03: NODE_SYNC"; gatePill3.style.color = '#7b2fff';
+        } else if (data.testThreeStatus === "GATE_UNLOCKED") {
+          appendMessage('ARCHON', data.reply);
+          gatePill3.textContent = "GATE_03: OPENED"; gatePill3.style.color = '#00ff88';
+        } else {
+          appendMessage('ARCHON', data.reply || "SIGNAL ROUTED TO VESSEL CONTAINER.");
+        }
+      } else {
+        appendMessage('SYSTEM', '[ERROR] TRANSMISSION TUNNEL BLOCKED.');
+      }
+    } catch(err) {
+      appendMessage('SYSTEM', '[CRITICAL CRASH] NETWORK HANDSHAKE DROPPED.');
+    } finally {
+      inputField.disabled = false; dispatchBtn.disabled = false; inputField.focus();
+    }
+  });
+</script>
+</body>
+</html>
