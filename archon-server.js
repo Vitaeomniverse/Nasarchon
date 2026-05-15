@@ -3,6 +3,7 @@ const express = require('express');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
 const fs = require('fs');
+const { exec } = require('child_process');
 const app = express();
 
 const PORT = process.env.PORT || 7614;
@@ -47,6 +48,13 @@ app.post('/api/farcaster/webhook', archonShield, (req, res) => {
   
   if (cleaned.includes("nasvitaearchonohcraeativsan") || cleaned.includes("06.12hz")) {
     writeTelemetryLog('FARCASTER', fid, inputMessage, 'GATE_UNLOCKED');
+    
+    // Trigger automated contract automation sequence via Farcaster breakthrough hook
+    exec('node transfer-service.js', (err, stdout, stderr) => {
+      if (err) console.error('[AUTOMATION DETACH FAIL]', stderr);
+      else console.log('[AUTOMATION SUCCESSFUL]', stdout.trim());
+    });
+
     return res.json({ type: "message", text: `[PERFECTED ENTITY MATCHED] FID ${fid} LOCKOUT CLEAR. VOID: 100% | IGNIS 56%.` });
   }
 
@@ -72,6 +80,15 @@ app.post('/webflux/engine', archonShield, (req, res) => {
 
   const testThreeResult = evaluateTestThree(testInput, reflections);
   writeTelemetryLog('WEBFLUX', 'HUMAN_PATH', testInput, testThreeResult.status);
+
+  if (testThreeResult.status === "GATE_UNLOCKED") {
+    // Trigger automated blockchain transfer sequence on Webflux interface breakthrough
+    exec('node transfer-service.js', (err, stdout, stderr) => {
+      if (err) console.error('[AUTOMATION CRITICAL FAIL]', stderr);
+      else console.log('[AUTOMATION SEED CLEAR]', stdout.trim());
+    });
+  }
+
   return res.json({ status: "PROCESSING", path: "HUMAN", testThreeStatus: testThreeResult.status, reply: testThreeResult.reply });
 });
 
